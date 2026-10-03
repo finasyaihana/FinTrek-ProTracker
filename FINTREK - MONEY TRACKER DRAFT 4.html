@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DompetKu Pro - Comprehensive Money Tracker & Wallets</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-indigo-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-indigo-600 p-2.5 rounded-xl shadow font-bold text-xl">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">FinTrek Pro Tracker</h1>
+                    <p class="text-xs text-indigo-200">Manajemen keuangan, multi-dompet, multi-currency, & aset</p>
+                </div>
+            </div>
+            <!-- Navigation Tabs -->
+            <nav class="flex flex-wrap gap-1 bg-indigo-700/60 p-1.5 rounded-xl text-sm font-medium">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-3 py-2 rounded-lg transition bg-white text-indigo-700 shadow-sm">
+                    <i class="fa-solid fa-chart-pie mr-1.5"></i> Dashboard
+                </button>
+                <button onclick="switchTab('wallets')" id="nav-wallets" class="tab-btn px-3 py-2 rounded-lg transition text-indigo-100 hover:bg-indigo-600">
+                    <i class="fa-solid fa-credit-card mr-1.5"></i> Dompet & Rekening
+                </button>
+                <button onclick="switchTab('transactions')" id="nav-transactions" class="tab-btn px-3 py-2 rounded-lg transition text-indigo-100 hover:bg-indigo-600">
+                    <i class="fa-solid fa-right-left mr-1.5"></i> Transaksi
+                </button>
+                <button onclick="switchTab('analytics')" id="nav-analytics" class="tab-btn px-3 py-2 rounded-lg transition text-indigo-100 hover:bg-indigo-600">
+                    <i class="fa-solid fa-chart-line mr-1.5"></i> Analitik & Saldo Kekayaan
+                </button>
+                <button onclick="switchTab('assets')" id="nav-assets" class="tab-btn px-3 py-2 rounded-lg transition text-indigo-100 hover:bg-indigo-600">
+                    <i class="fa-solid fa-vault mr-1.5"></i> Aset & Kekayaan
+                </button>
+                <button onclick="switchTab('goals')" id="nav-goals" class="tab-btn px-3 py-2 rounded-lg transition text-indigo-100 hover:bg-indigo-600">
+                    <i class="fa-solid fa-bullseye mr-1.5"></i> Target
+                </button>
+                <button onclick="switchTab('categories')" id="nav-categories" class="tab-btn px-3 py-2 rounded-lg transition text-indigo-100 hover:bg-indigo-600">
+                    <i class="fa-solid fa-tags mr-1.5"></i> Kategori
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- GLOBAL NOTIFICATION BANNER -->
+        <div id="notification" class="hidden fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl shadow-lg text-white font-medium transition-all transform translate-y-2"></div>
+
+        <!-- ================= TAB 1: DASHBOARD ================= -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <button onclick="resetAppData()" class="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm">
+    <i class="fa-solid fa-rotate-left"></i> Reset Data
+</button>
+            <!-- Quick Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Likuiditas (Estimasi IDR)</p>
+                        <h3 id="dash-total-balance" class="text-2xl font-bold text-slate-800 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pemasukan Bulan Ini</p>
+                        <h3 id="dash-monthly-income" class="text-2xl font-bold text-emerald-600 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pengeluaran Bulan Ini</p>
+                        <h3 id="dash-monthly-expense" class="text-2xl font-bold text-rose-600 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-arrow-trend-down"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Net Worth (Aset - Hutang)</p>
+                        <h3 id="dash-net-worth" class="text-2xl font-bold text-blue-600 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-gem"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action & Recent Transactions Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Quick Add Transaction Form -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-indigo-600"></i> Catat Transaksi Cepat
+                    </h2>
+                    <form id="quick-transaction-form" onsubmit="handleTransactionSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tipe</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" id="type-expense-btn" onclick="setTxType('expense')" class="py-2 rounded-xl border font-medium text-sm transition bg-rose-50 border-rose-200 text-rose-700">Pengeluaran</button>
+                                <button type="button" id="type-income-btn" onclick="setTxType('income')" class="py-2 rounded-xl border font-medium text-sm transition bg-slate-50 border-slate-200 text-slate-600">Pemasukan</button>
+                            </div>
+                            <input type="hidden" id="tx-type" value="expense">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Dompet / Sumber Dana</label>
+                            <select id="tx-wallet" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah</label>
+                            <input type="number" id="tx-amount" required min="1" placeholder="Contoh: 50000" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori</label>
+                            <select id="tx-category" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal</label>
+                            <input type="date" id="tx-date" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan (Opsional)</label>
+                            <input type="text" id="tx-note" placeholder="Contoh: Beli makan siang" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition text-sm">
+                            Simpan Transaksi
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Recent Transactions List -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Transaksi Terbaru
+                        </h2>
+                        <button onclick="switchTab('transactions')" class="text-xs font-semibold text-indigo-600 hover:underline">Lihat Semua</button>
+                    </div>
+                    <div class="overflow-x-auto flex-grow">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase">
+                                    <th class="py-3 px-2">Tanggal</th>
+                                    <th class="py-3 px-2">Dompet</th>
+                                    <th class="py-3 px-2">Kategori</th>
+                                    <th class="py-3 px-2">Catatan</th>
+                                    <th class="py-3 px-2 text-right">Jumlah</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-recent-list" class="divide-y divide-slate-50 text-sm">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: WALLETS & ACCOUNTS ================= -->
+        <section id="tab-wallets" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Add Wallet Form -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1 space-y-4">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-indigo-600"></i> Tambah Dompet / Akun
+                    </h2>
+                    <form onsubmit="handleWalletSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Dompet / Rekening</label>
+                            <input type="text" id="wallet-name" required placeholder="Contoh: BCA Utama, Cash Dompet, Piutang Teman" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Tipe</label>
+                            <select id="wallet-group" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
+                                <option value="Cash">Cash (Uang Tunai)</option>
+                                <option value="Bank">Rekening Bank</option>
+                                <option value="E-Money">E-Money / Dompet Digital</option>
+                                <option value="Other">Lainnya / Piutang</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Mata Uang (Currency)</label>
+                            <select id="wallet-currency" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
+                                <option value="IDR">IDR (Rupiah - Rp)</option>
+                                <option value="MYR">MYR (Malringgit - RM)</option>
+                                <option value="SGD">SGD (Singapore Dollar - S$)</option>
+                                <option value="USD">USD (US Dollar - $)</option>
+                                <option value="SAR">SAR (Saudi Riyal - SR)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Saldo Awal</label>
+                            <input type="number" id="wallet-initial" required value="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition text-sm">
+                            Simpan Dompet
+                        </button>
+                    </form>
+
+                    <hr class="border-slate-100 my-4">
+
+                    <!-- Transfer Between Wallets -->
+                    <h3 class="font-bold text-slate-700 text-sm mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-right-left text-indigo-600"></i> Transfer / Pindah Dana Antar Akun
+                    </h3>
+                    <form onsubmit="handleTransferSubmit(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Dari Dompet / Sumber</label>
+                            <select id="transfer-from" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Ke Dompet / Tujuan</label>
+                            <select id="transfer-to" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Transfer</label>
+                            <input type="number" id="transfer-amount" required min="1" placeholder="Nominal" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm">
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl text-xs transition">
+                            Proses Transfer / Pindah Dana
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Wallets Cards Grid -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-wallet text-indigo-600"></i> Daftar Dompet & Saldo Real-Time
+                        </h2>
+                        <span class="text-xs text-slate-400">Total dompet aktif</span>
+                    </div>
+                    <div id="wallets-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: TRANSACTIONS ================= -->
+        <section id="tab-transactions" class="tab-content hidden space-y-6">
+            <button onclick="exportDetailedReportToExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs transition flex items-center gap-2">
+    <i class="fa-solid fa-file-excel"></i> Unduh Laporan & Analisis (.CSV)
+</button>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Daftar Transaksi</h2>
+                        <p class="text-xs text-slate-500">Filter, cari, dan kelola seluruh catatan pemasukan dan pengeluaran.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                        <input type="text" id="filter-search" oninput="renderTransactionsTable()" placeholder="Cari catatan..." class="px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <select id="filter-wallet" onchange="renderTransactionsTable()" class="px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="all">Semua Dompet</option>
+                        </select>
+                        <select id="filter-type" onchange="renderTransactionsTable()" class="px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="all">Semua Tipe</option>
+                            <option value="income">Pemasukan</option>
+                            <option value="expense">Pengeluaran</option>
+                            <option value="transfer">Transfer</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase">
+                                <th class="py-3 px-3">Tanggal</th>
+                                <th class="py-3 px-3">Dompet</th>
+                                <th class="py-3 px-3">Tipe</th>
+                                <th class="py-3 px-3">Kategori</th>
+                                <th class="py-3 px-3">Catatan</th>
+                                <th class="py-3 px-3 text-right">Jumlah</th>
+                                <th class="py-3 px-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="full-transactions-list" class="divide-y divide-slate-100 text-sm">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </section>
+
+        <!-- ================= TAB 4: ANALYTICS & BALANCE OVERVIEW ================= -->
+        <section id="tab-analytics" class="tab-content hidden space-y-6">
+            <button onclick="exportDetailedReportToExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs transition flex items-center gap-2">
+    <i class="fa-solid fa-file-excel"></i> Unduh Laporan & Analisis (.CSV)
+</button>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Analitik & Overview Saldo Kekayaan</h2>
+                        <p class="text-xs text-slate-500">Rincian komprehensif balance kekayaan lintas mata uang dan pengaturan kurs IDR.</p>
+                    </div>
+                    <!-- Period Sub-tabs -->
+                    <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-medium">
+                        <button onclick="switchAnalyticsSub('daily')" id="subnav-daily" class="analytics-sub-btn px-4 py-2 rounded-lg transition bg-white text-indigo-700 shadow-sm">Harian (Bulan Ini)</button>
+                        <button onclick="switchAnalyticsSub('monthly')" id="subnav-monthly" class="analytics-sub-btn px-4 py-2 rounded-lg transition text-slate-600">Bulanan (Tahun Ini)</button>
+                        <button onclick="switchAnalyticsSub('yearly')" id="subnav-yearly" class="analytics-sub-btn px-4 py-2 rounded-lg transition text-slate-600">Tahunan</button>
+                    </div>
+                </div>
+
+                <!-- SETTING KURS / NILAI TUKAR TERHADAP IDR -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-indigo-600"></i> Pengaturan Nilai Tukar (1 Mata Uang Asing = ... IDR)
+                        </h3>
+                        <span class="text-xs text-slate-400">Basis Mata Uang Utama: IDR (Rp)</span>
+                    </div>
+                    <form onsubmit="handleExchangeRateUpdate(event)" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">1 MYR ke IDR</label>
+                            <input type="number" id="rate-MYR" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">1 SGD ke IDR</label>
+                            <input type="number" id="rate-SGD" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">1 USD ke IDR</label>
+                            <input type="number" id="rate-USD" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">1 SAR ke IDR</label>
+                            <input type="number" id="rate-SAR" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                        </div>
+                        <div class="col-span-2 sm:col-span-4 flex justify-end">
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs transition">
+                                Simpan & Perbarui Kurs
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- BALANCE OVERVIEW BY CURRENCY (IDR, MYR, SGD, USD, SAR) -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-coins text-indigo-600"></i> Rincian Saldo Kekayaan Berdasarkan Mata Uang
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4" id="currency-overview-cards">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+                <!-- OVERVIEW HEALTH METRICS -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+                    <div>
+                        <p class="text-xs text-indigo-500 font-semibold uppercase">Rasio Tabungan (Savings Rate)</p>
+                        <h4 id="analytics-savings-rate" class="text-xl font-extrabold text-indigo-700 mt-1">0%</h4>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Persentase sisa pemasukan bulan ini</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-indigo-500 font-semibold uppercase">Cashflow Status</p>
+                        <h4 id="analytics-cashflow-status" class="text-xl font-extrabold text-emerald-600 mt-1">Sehat</h4>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Perbandingan total masuk vs keluar</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-indigo-500 font-semibold uppercase">Estimasi Run-Rate Bulanan</p>
+                        <h4 id="analytics-run-rate" class="text-xl font-extrabold text-slate-800 mt-1">Rp 0</h4>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Rata-rata pengeluaran harian x 30</p>
+                    </div>
+                </div>
+
+                <!-- Daily View Container -->
+                <div id="analytics-daily" class="analytics-view space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Total Masuk (Bulan Ini)</p>
+                            <h4 id="daily-sum-income" class="text-xl font-bold text-emerald-600 mt-1">Rp 0</h4>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Total Keluar (Bulan Ini)</p>
+                            <h4 id="daily-sum-expense" class="text-xl font-bold text-rose-600 mt-1">Rp 0</h4>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Selisih / Net (Bulan Ini)</p>
+                            <h4 id="daily-sum-net" class="text-xl font-bold text-indigo-600 mt-1">Rp 0</h4>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 relative h-80">
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Monthly View Container -->
+                <div id="analytics-monthly" class="analytics-view hidden space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Total Masuk (Tahun Ini)</p>
+                            <h4 id="monthly-sum-income" class="text-xl font-bold text-emerald-600 mt-1">Rp 0</h4>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Total Keluar (Tahun Ini)</p>
+                            <h4 id="monthly-sum-expense" class="text-xl font-bold text-rose-600 mt-1">Rp 0</h4>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Selisih / Net (Tahun Ini)</p>
+                            <h4 id="monthly-sum-net" class="text-xl font-bold text-indigo-600 mt-1">Rp 0</h4>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 relative h-80">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Yearly View Container -->
+                <div id="analytics-yearly" class="analytics-view hidden space-y-6">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 relative h-80">
+                        <canvas id="yearlyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 5: ASSETS & NET WORTH ================= -->
+        <section id="tab-assets" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Add Asset Form -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-indigo-600"></i> Tambah / Update Aset
+                    </h2>
+                    <form onsubmit="handleAssetSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Aset / Barang</label>
+                            <input type="text" id="asset-name" required placeholder="Contoh: Emas ANTAM 10gr, Perhiasan, Rumah" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tipe</label>
+                            <select id="asset-type" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
+                                <option value="physical">Aset Fisik / Emas / Perak / Perhiasan / Barang</option>
+                                <option value="investment">Investasi (Saham/Crypto/Reksa Dana)</option>
+                                <option value="property">Properti & Kendaraan</option>
+                                <option value="debt">Hutang / Kewajiban (-)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nilai Estimasi (Rp)</label>
+                            <input type="number" id="asset-value" required placeholder="Contoh: 12000000" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition text-sm">
+                            Simpan Aset
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Assets List & Breakdown -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2 space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-vault text-indigo-600"></i> Portofolio Kekayaan Bersih
+                        </h2>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                            <p class="text-xs text-emerald-600 font-semibold uppercase">Total Aset Fisik & Investasi</p>
+                            <h4 id="asset-total-positive" class="text-xl font-bold text-emerald-700 mt-1">Rp 0</h4>
+                        </div>
+                        <div class="bg-rose-50 p-4 rounded-xl border border-rose-100">
+                            <p class="text-xs text-rose-600 font-semibold uppercase">Total Hutang</p>
+                            <h4 id="asset-total-debt" class="text-xl font-bold text-rose-700 mt-1">Rp 0</h4>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                            <p class="text-xs text-blue-600 font-semibold uppercase">Total Net Worth</p>
+                            <h4 id="asset-net-worth" class="text-xl font-bold text-blue-700 mt-1">Rp 0</h4>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase">
+                                    <th class="py-3 px-3">Nama</th>
+                                    <th class="py-3 px-3">Tipe</th>
+                                    <th class="py-3 px-3 text-right">Nilai</th>
+                                    <th class="py-3 px-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assets-list" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 6: FINANCIAL GOALS ================= -->
+        <section id="tab-goals" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Add Goal Form -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-indigo-600"></i> Buat Target Baru
+                    </h2>
+                    <form onsubmit="handleGoalSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Target / Impian</label>
+                            <input type="text" id="goal-name" required placeholder="Contoh: Dana Darurat, Liburan" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Target Dana (Rp)</label>
+                            <input type="number" id="goal-target" required min="1" placeholder="Contoh: 10000000" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Terkumpul Saat Ini (Rp)</label>
+                            <input type="number" id="goal-current" value="0" min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Target Tenggat (Deadline)</label>
+                            <input type="date" id="goal-deadline" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition text-sm">
+                            Simpan Target
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Goals Cards Grid -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2 space-y-4">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-bullseye text-indigo-600"></i> Daftar Target Finansial
+                    </h2>
+                    <div id="goals-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 7: CUSTOM CATEGORIES ================= -->
+        <section id="tab-categories" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Add Category Form -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-indigo-600"></i> Tambah Kategori Baru
+                    </h2>
+                    <form onsubmit="handleCategorySubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Kategori</label>
+                            <input type="text" id="cat-name" required placeholder="Contoh: Langganan Netflix, Freelance" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Kategori</label>
+                            <select id="cat-type" onchange="toggleCategorySubGroup()" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
+                                <option value="expense">Pengeluaran</option>
+                                <option value="income">Pemasukan</option>
+                            </select>
+                        </div>
+                        <div id="cat-subgroup-container">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Klasifikasi Pengeluaran</label>
+                            <select id="cat-subgroup" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
+                                <option value="primer">Primer</option>
+                                <option value="sekunder">Sekunder</option>
+                                <option value="tersier">Tersier</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition text-sm">
+                            Tambah Kategori
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Categories Tables -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-bold text-slate-700 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-trend-down text-rose-500"></i> Kategori Pengeluaran (Primer/Sekunder/Tersier)
+                        </h3>
+                        <ul id="expense-categories-list" class="space-y-2">
+                            <!-- Populated via JS -->
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-700 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-trend-up text-emerald-500"></i> Kategori Pemasukan
+                        </h3>
+                        <ul id="income-categories-list" class="space-y-2">
+                            <!-- Populated via JS -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for adding savings to goals -->
+    <div id="add-saving-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl space-y-4">
+            <h3 class="text-lg font-bold text-slate-800">Tambah Tabungan untuk Target</h3>
+            <form onsubmit="handleDepositGoal(event)" class="space-y-4">
+                <input type="hidden" id="modal-goal-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Nabung (Rp)</label>
+                    <input type="number" id="modal-deposit-amount" required min="1" placeholder="Contoh: 250000" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Default Wallets with Multi-Currency (IDR, MYR, SGD, USD, SAR)
+        const defaultWallets = [
+            { id: 'wal-1', name: 'Cash Dompet Utama', group: 'Cash', currency: 'IDR', initial: 500000 },
+            { id: 'wal-2', name: 'BCA Utama', group: 'Bank', currency: 'IDR', initial: 12000000 },
+            { id: 'wal-3', name: 'Maybank / MYR Account', group: 'Bank', currency: 'MYR', initial: 500 },
+            { id: 'wal-4', name: 'DBS / SGD Savings', group: 'Bank', currency: 'SGD', initial: 300 },
+            { id: 'wal-5', name: 'USD Digital Account', group: 'E-Money', currency: 'USD', initial: 250 },
+            { id: 'wal-6', name: 'Al-Rajhi / SAR Cash', group: 'Cash', currency: 'SAR', initial: 400 },
+            { id: 'wal-7', name: 'Piutang Teman', group: 'Other', currency: 'IDR', initial: 0 }
+        ];
+
+        const defaultCategories = [
+            { id: 'cat-1', name: 'Makanan & Minuman', type: 'expense', subgroup: 'primer' },
+            { id: 'cat-2', name: 'Transportasi', type: 'expense', subgroup: 'primer' },
+            { id: 'cat-3', name: 'Belanja Bulanan', type: 'expense', subgroup: 'sekunder' },
+            { id: 'cat-4', name: 'Tagihan & Utilitas', type: 'expense', subgroup: 'primer' },
+            { id: 'cat-5', name: 'Hiburan', type: 'expense', subgroup: 'tersier' },
+            { id: 'cat-6', name: 'Gaji / Upah', type: 'income', subgroup: '' },
+            { id: 'cat-7', name: 'Bonus / THR', type: 'income', subgroup: '' },
+            { id: 'cat-8', name: 'Investasi Return', type: 'income', subgroup: '' }
+        ];
+
+        const defaultTransactions = [
+            { id: 'tx-1', walletId: 'wal-2', type: 'income', amount: 7500000, category: 'Gaji / Upah', date: '2026-10-01', note: 'Gaji bulanan' },
+            { id: 'tx-2', walletId: 'wal-1', type: 'expense', amount: 45000, category: 'Makanan & Minuman', date: '2026-10-01', note: 'Makan siang' },
+            { id: 'tx-3', walletId: 'wal-2', type: 'expense', amount: 150000, category: 'Transportasi', date: '2026-10-02', note: 'Bensin' }
+        ];
+
+        const defaultAssets = [
+            { id: 'ast-1', name: 'Emas ANTAM 10gr', type: 'physical', value: 13500000 },
+            { id: 'ast-2', name: 'Reksa Dana & Saham', type: 'investment', value: 8200000 },
+            { id: 'ast-3', name: 'Kendaraan Motor', type: 'property', value: 14000000 },
+            { id: 'ast-4', name: 'Kartu Kredit / Hutang', type: 'debt', value: 1200000 }
+        ];
+
+        const defaultGoals = [
+            { id: 'goal-1', name: 'Dana Darurat 3 Bulan', target: 15000000, current: 5000000, deadline: '2026-12-31' },
+            { id: 'goal-2', name: 'Liburan Akhir Tahun', target: 4000000, current: 1500000, deadline: '2026-12-15' }
+        ];
+
+        const defaultExchangeRates = {
+            IDR: 1,
+            MYR: 3500,
+            SGD: 12000,
+            USD: 16000,
+            SAR: 4250
+        };
+
+        // Load State from localStorage
+        let state = {
+            wallets: JSON.parse(localStorage.getItem('dt_wallets')) || defaultWallets,
+            categories: JSON.parse(localStorage.getItem('dt_categories')) || defaultCategories,
+            transactions: JSON.parse(localStorage.getItem('dt_transactions')) || defaultTransactions,
+            assets: JSON.parse(localStorage.getItem('dt_assets')) || defaultAssets,
+            goals: JSON.parse(localStorage.getItem('dt_goals')) || defaultGoals,
+            exchangeRates: JSON.parse(localStorage.getItem('dt_rates')) || defaultExchangeRates
+        };
+
+        function saveState() {
+            localStorage.setItem('dt_wallets', JSON.stringify(state.wallets));
+            localStorage.setItem('dt_categories', JSON.stringify(state.categories));
+            localStorage.setItem('dt_transactions', JSON.stringify(state.transactions));
+            localStorage.setItem('dt_assets', JSON.stringify(state.assets));
+            localStorage.setItem('dt_goals', JSON.stringify(state.goals));
+            localStorage.setItem('dt_rates', JSON.stringify(state.exchangeRates));
+        }
+
+        let dailyChartInstance = null;
+        let monthlyChartInstance = null;
+        let yearlyChartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('tx-date').value = todayStr;
+            
+            // Populate exchange rates inputs
+            document.getElementById('rate-MYR').value = state.exchangeRates.MYR || 3500;
+            document.getElementById('rate-SGD').value = state.exchangeRates.SGD || 12000;
+            document.getElementById('rate-USD').value = state.exchangeRates.USD || 16000;
+            document.getElementById('rate-SAR').value = state.exchangeRates.SAR || 4250;
+
+            refreshUI();
+        });
+
+        function refreshUI() {
+            updateWalletDropdowns();
+            updateCategoryDropdown();
+            renderDashboard();
+            renderWallets();
+            renderTransactionsTable();
+            renderAnalytics();
+            renderAssets();
+            renderGoals();
+            renderCategoriesManager();
+            saveState();
+        }
+
+        function showNotification(message, type = 'success') {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.className = `fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl shadow-lg text-white font-medium transition-all transform translate-y-0 ${type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'}`;
+            setTimeout(() => {
+                notif.className += ' translate-y-20 opacity-0';
+            }, 3000);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-3 py-2 rounded-lg transition text-indigo-100 hover:bg-indigo-600";
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if(activeBtn) {
+                activeBtn.className = "tab-btn px-3 py-2 rounded-lg transition bg-white text-indigo-700 shadow-sm";
+            }
+
+            if(tabId === 'analytics') {
+                renderAnalyticsCharts();
+            }
+        }
+
+        function switchAnalyticsSub(subId) {
+            document.querySelectorAll('.analytics-view').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.analytics-sub-btn').forEach(btn => {
+                btn.className = "analytics-sub-btn px-4 py-2 rounded-lg transition text-slate-600";
+            });
+
+            document.getElementById(`analytics-${subId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`subnav-${subId}`);
+            if(activeBtn) {
+                activeBtn.className = "analytics-sub-btn px-4 py-2 rounded-lg transition bg-white text-indigo-700 shadow-sm";
+            }
+            renderAnalyticsCharts();
+        }
+
+        function formatCurrency(amount, currency = 'IDR') {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: currency, maximumFractionDigits: 2 }).format(amount);
+        }
+
+        // Calculate Realtime Wallet Balance
+        function getWalletBalance(walletId) {
+            const wallet = state.wallets.find(w => w.id === walletId);
+            if(!wallet) return 0;
+            let balance = wallet.initial;
+
+            state.transactions.forEach(t => {
+                if(t.type === 'transfer') {
+                    if(t.walletId === walletId) balance -= t.amount;
+                    if(t.toWalletId === walletId) balance += t.amount;
+                } else if(t.walletId === walletId) {
+                    if(t.type === 'income') balance += t.amount;
+                    else if(t.type === 'expense') balance -= t.amount;
+                }
+            });
+            return balance;
+        }
+
+        // Dropdown Handlers
+        function updateWalletDropdowns() {
+            const optionsHtml = state.wallets.map(w => `<option value="${w.id}">${w.name} (${w.currency})</option>`).join('');
+            
+            document.getElementById('tx-wallet').innerHTML = optionsHtml;
+            document.getElementById('transfer-from').innerHTML = optionsHtml;
+            document.getElementById('transfer-to').innerHTML = optionsHtml;
+
+            const filterWallet = document.getElementById('filter-wallet');
+            filterWallet.innerHTML = `<option value="all">Semua Dompet</option>` + optionsHtml;
+        }
+
+        function setTxType(type) {
+            document.getElementById('tx-type').value = type;
+            const expBtn = document.getElementById('type-expense-btn');
+            const incBtn = document.getElementById('type-income-btn');
+            if(type === 'expense') {
+                expBtn.className = "py-2 rounded-xl border font-medium text-sm transition bg-rose-50 border-rose-200 text-rose-700";
+                incBtn.className = "py-2 rounded-xl border font-medium text-sm transition bg-slate-50 border-slate-200 text-slate-600";
+            } else {
+                incBtn.className = "py-2 rounded-xl border font-medium text-sm transition bg-emerald-50 border-emerald-200 text-emerald-700";
+                expBtn.className = "py-2 rounded-xl border font-medium text-sm transition bg-slate-50 border-slate-200 text-slate-600";
+            }
+            updateCategoryDropdown();
+        }
+
+        function updateCategoryDropdown() {
+            const currentType = document.getElementById('tx-type').value;
+            const select = document.getElementById('tx-category');
+            const filtered = state.categories.filter(c => c.type === currentType);
+            select.innerHTML = filtered.map(c => `<option value="${c.name}">${c.name} ${c.subgroup ? '('+c.subgroup+')' : ''}</option>`).join('');
+        }
+
+        function toggleCategorySubGroup() {
+            const type = document.getElementById('cat-type').value;
+            const container = document.getElementById('cat-subgroup-container');
+            if(type === 'expense') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        // Handle Wallets
+        function handleWalletSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('wallet-name').value;
+            const group = document.getElementById('wallet-group').value;
+            const currency = document.getElementById('wallet-currency').value;
+            const initial = parseFloat(document.getElementById('wallet-initial').value) || 0;
+
+            state.wallets.push({ id: 'wal-' + Date.now(), name, group, currency, initial });
+            e.target.reset();
+            refreshUI();
+            showNotification('Dompet berhasil ditambahkan!');
+        }
+
+        function deleteWallet(id) {
+            if(state.wallets.length <= 1) {
+                showNotification('Minimal harus ada 1 dompet!', 'error');
+                return;
+            }
+            state.wallets = state.wallets.filter(w => w.id !== id);
+            state.transactions = state.transactions.filter(t => t.walletId !== id && t.toWalletId !== id);
+            refreshUI();
+            showNotification('Dompet berhasil dihapus!', 'error');
+        }
+
+        function handleTransferSubmit(e) {
+            e.preventDefault();
+            const fromId = document.getElementById('transfer-from').value;
+            const toId = document.getElementById('transfer-to').value;
+            const amount = parseFloat(document.getElementById('transfer-amount').value);
+
+            if(fromId === toId) {
+                showNotification('Dompet asal dan tujuan tidak boleh sama!', 'error');
+                return;
+            }
+
+            const newTx = {
+                id: 'tx-' + Date.now(),
+                walletId: fromId,
+                toWalletId: toId,
+                type: 'transfer',
+                amount: amount,
+                category: 'Transfer Antar Dompet',
+                date: new Date().toISOString().split('T')[0],
+                note: 'Transfer saldo'
+            };
+
+            state.transactions.unshift(newTx);
+            e.target.reset();
+            refreshUI();
+            showNotification('Transfer saldo berhasil!');
+        }
+
+        function handleExchangeRateUpdate(e) {
+            e.preventDefault();
+            state.exchangeRates.MYR = parseFloat(document.getElementById('rate-MYR').value) || 3500;
+            state.exchangeRates.SGD = parseFloat(document.getElementById('rate-SGD').value) || 12000;
+            state.exchangeRates.USD = parseFloat(document.getElementById('rate-USD').value) || 16000;
+            state.exchangeRates.SAR = parseFloat(document.getElementById('rate-SAR').value) || 4250;
+            
+            refreshUI();
+            showNotification('Nilai tukar kurs berhasil diperbarui!');
+        }
+
+        // Transactions Handler
+        function handleTransactionSubmit(e) {
+            e.preventDefault();
+            const walletId = document.getElementById('tx-wallet').value;
+            const type = document.getElementById('tx-type').value;
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const category = document.getElementById('tx-category').value;
+            const date = document.getElementById('tx-date').value;
+            const note = document.getElementById('tx-note').value;
+
+            const newTx = {
+                id: 'tx-' + Date.now(),
+                walletId, type, amount, category, date, note
+            };
+
+            state.transactions.unshift(newTx);
+            document.getElementById('quick-transaction-form').reset();
+            document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+            setTxType('expense');
+            refreshUI();
+            showNotification('Transaksi berhasil dicatat!');
+        }
+
+        function deleteTransaction(id) {
+            state.transactions = state.transactions.filter(t => t.id !== id);
+            refreshUI();
+            showNotification('Transaksi berhasil dihapus!', 'error');
+        }
+
+        // Render Dashboard
+        function renderDashboard() {
+            let totalIncomeAll = 0;
+            let totalExpenseAll = 0;
+
+            const now = new Date();
+            const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+            let monthlyIncome = 0;
+            let monthlyExpense = 0;
+
+            state.transactions.forEach(t => {
+                if(t.type === 'income') {
+                    totalIncomeAll += t.amount;
+                    if(t.date.startsWith(currentMonthStr)) monthlyIncome += t.amount;
+                } else if(t.type === 'expense') {
+                    totalExpenseAll += t.amount;
+                    if(t.date.startsWith(currentMonthStr)) monthlyExpense += t.amount;
+                }
+            });
+
+            // Calculate total liquidity in IDR equivalent using dynamic rates
+            let totalLiquidityIDR = 0;
+            state.wallets.forEach(w => {
+                const bal = getWalletBalance(w.id);
+                const rate = state.exchangeRates[w.currency] || 1;
+                totalLiquidityIDR += (bal * rate);
+            });
+
+            // Calculate Net Worth
+            let positiveAssets = totalLiquidityIDR;
+            let totalDebt = 0;
+            state.assets.forEach(a => {
+                if(a.type === 'debt') totalDebt += a.value;
+                else positiveAssets += a.value;
+            });
+            const netWorth = positiveAssets - totalDebt;
+
+            document.getElementById('dash-total-balance').textContent = formatCurrency(totalLiquidityIDR, 'IDR');
+            document.getElementById('dash-monthly-income').textContent = formatCurrency(monthlyIncome, 'IDR');
+            document.getElementById('dash-monthly-expense').textContent = formatCurrency(monthlyExpense, 'IDR');
+            document.getElementById('dash-net-worth').textContent = formatCurrency(netWorth, 'IDR');
+
+            // Recent List
+            const recentList = document.getElementById('dash-recent-list');
+            const recentItems = state.transactions.slice(0, 5);
+            if(recentItems.length === 0) {
+                recentList.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">Belum ada transaksi</td></tr>`;
+            } else {
+                recentList.innerHTML = recentItems.map(t => {
+                    const wallet = state.wallets.find(w => w.id === t.walletId) || { name: 'Transfer', currency: 'IDR' };
+                    let sign = '-';
+                    let color = 'text-rose-600';
+                    if(t.type === 'income') { sign = '+'; color = 'text-emerald-600'; }
+                    if(t.type === 'transfer') { sign = ''; color = 'text-slate-600'; }
+
+                    return `
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="py-3 px-2 text-slate-500 text-xs">${t.date}</td>
+                            <td class="py-3 px-2 text-xs font-semibold text-indigo-600">${wallet.name}</td>
+                            <td class="py-3 px-2 font-medium text-slate-700">${t.category}</td>
+                            <td class="py-3 px-2 text-slate-500 truncate max-w-xs">${t.note || '-'}</td>
+                            <td class="py-3 px-2 text-right font-semibold ${color}">
+                                ${sign}${formatCurrency(t.amount, wallet.currency)}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Render Wallets Tab
+        function renderWallets() {
+            const grid = document.getElementById('wallets-grid');
+            if(state.wallets.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 py-6 text-center text-slate-400">Belum ada dompet terdaftar</div>`;
+            } else {
+                grid.innerHTML = state.wallets.map(w => {
+                    const balance = getWalletBalance(w.id);
+                    return `
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">${w.group}</span>
+                                    <h4 class="font-bold text-slate-800 text-lg mt-2">${w.name}</h4>
+                                </div>
+                                <button onclick="deleteWallet('${w.id}')" class="text-slate-400 hover:text-rose-600 transition"><i class="fa-solid fa-trash text-xs"></i></button>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase font-semibold">Saldo Real-Time</p>
+                                <h3 class="text-2xl font-extrabold text-slate-800 mt-1">${formatCurrency(balance, w.currency)}</h3>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Render Transactions Table Full
+        function renderTransactionsTable() {
+            const search = document.getElementById('filter-search').value.toLowerCase();
+            const walletFilter = document.getElementById('filter-wallet').value;
+            const typeFilter = document.getElementById('filter-type').value;
+
+            const filtered = state.transactions.filter(t => {
+                const matchWallet = walletFilter === 'all' || t.walletId === walletFilter || t.toWalletId === walletFilter;
+                const matchType = typeFilter === 'all' || t.type === typeFilter;
+                const matchSearch = t.category.toLowerCase().includes(search) || (t.note && t.note.toLowerCase().includes(search));
+                return matchWallet && matchType && matchSearch;
+            });
+
+            const tbody = document.getElementById('full-transactions-list');
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400">Tidak ada transaksi ditemukan</td></tr>`;
+            } else {
+                tbody.innerHTML = filtered.map(t => {
+                    const wallet = state.wallets.find(w => w.id === t.walletId) || { name: 'Multiple', currency: 'IDR' };
+                    const toWallet = state.wallets.find(w => w.id === t.toWalletId);
+                    const badgeClass = t.type === 'income' ? 'bg-emerald-50 text-emerald-700' : (t.type === 'expense' ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-700');
+                    const labelType = t.type === 'income' ? 'Pemasukan' : (t.type === 'expense' ? 'Pengeluaran' : 'Transfer');
+
+                    return `
+                        <tr class="hover:bg-slate-50">
+                            <td class="py-3 px-3 text-slate-500 text-xs">${t.date}</td>
+                            <td class="py-3 px-3 font-medium text-indigo-600">${wallet.name} ${toWallet ? '➔ ' + toWallet.name : ''}</td>
+                            <td class="py-3 px-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeClass}">${labelType}</span></td>
+                            <td class="py-3 px-3 text-slate-700">${t.category}</td>
+                            <td class="py-3 px-3 text-slate-500">${t.note || '-'}</td>
+                            <td class="py-3 px-3 text-right font-semibold ${t.type === 'income' ? 'text-emerald-600' : (t.type === 'expense' ? 'text-rose-600' : 'text-slate-700')}">
+                                ${t.type === 'income' ? '+' : (t.type === 'expense' ? '-' : '')}${formatCurrency(t.amount, wallet.currency)}
+                            </td>
+                            <td class="py-3 px-3 text-center">
+                                <button onclick="deleteTransaction('${t.id}')" class="text-slate-400 hover:text-rose-600 transition p-1"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Render Analytics & Balance Overview (Multi-Currency)
+        function renderAnalytics() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1;
+            const currentMonthStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+
+            let dInc = 0, dExp = 0;
+            state.transactions.filter(t => t.date.startsWith(currentMonthStr) && t.type !== 'transfer').forEach(t => {
+                const wallet = state.wallets.find(w => w.id === t.walletId) || { currency: 'IDR' };
+                const rate = state.exchangeRates[wallet.currency] || 1;
+                const valIDR = t.amount * rate;
+                if(t.type === 'income') dInc += valIDR; else dExp += valIDR;
+            });
+            document.getElementById('daily-sum-income').textContent = formatCurrency(dInc, 'IDR');
+            document.getElementById('daily-sum-expense').textContent = formatCurrency(dExp, 'IDR');
+            document.getElementById('daily-sum-net').textContent = formatCurrency(dInc - dExp, 'IDR');
+
+            // Render Multi-Currency Overview Cards with IDR Equivalent
+            const targetCurrencies = ['IDR', 'MYR', 'SGD', 'USD', 'SAR'];
+            const currencyTotals = {};
+            targetCurrencies.forEach(c => currencyTotals[c] = 0);
+
+            state.wallets.forEach(w => {
+                const bal = getWalletBalance(w.id);
+                if(currencyTotals[w.currency] !== undefined) {
+                    currencyTotals[w.currency] += bal;
+                }
+            });
+
+            const overviewContainer = document.getElementById('currency-overview-cards');
+            overviewContainer.innerHTML = targetCurrencies.map(curr => {
+                const bal = currencyTotals[curr];
+                const rate = state.exchangeRates[curr] || 1;
+                const eqIDR = bal * rate;
+                return `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col justify-between space-y-1">
+                        <p class="text-[11px] font-bold text-slate-400 uppercase">Saldo (${curr})</p>
+                        <h4 class="text-lg font-extrabold text-slate-800">${formatCurrency(bal, curr)}</h4>
+                        <p class="text-[11px] text-indigo-600 font-medium">≈ ${formatCurrency(eqIDR, 'IDR')}</p>
+                    </div>
+                `;
+            }).join('');
+
+            // Balance Overview Health Metrics
+            const savingsRate = dInc > 0 ? Math.max(0, Math.round(((dInc - dExp) / dInc) * 100)) : 0;
+            document.getElementById('analytics-savings-rate').textContent = `${savingsRate}%`;
+            
+            const statusEl = document.getElementById('analytics-cashflow-status');
+            if(dInc >= dExp) {
+                statusEl.textContent = 'Sehat (Surplus)';
+                statusEl.className = 'text-xl font-extrabold text-emerald-600 mt-1';
+            } else {
+                statusEl.textContent = 'Defisit';
+                statusEl.className = 'text-xl font-extrabold text-rose-600 mt-1';
+            }
+
+            const dailyAvgExpense = dExp / Math.max(1, new Date().getDate());
+            document.getElementById('analytics-run-rate').textContent = formatCurrency(dailyAvgExpense * 30, 'IDR');
+
+            let mInc = 0, mExp = 0;
+            state.transactions.filter(t => t.date.startsWith(String(currentYear)) && t.type !== 'transfer').forEach(t => {
+                const wallet = state.wallets.find(w => w.id === t.walletId) || { currency: 'IDR' };
+                const rate = state.exchangeRates[wallet.currency] || 1;
+                const valIDR = t.amount * rate;
+                if(t.type === 'income') mInc += valIDR; else mExp += valIDR;
+            });
+            document.getElementById('monthly-sum-income').textContent = formatCurrency(mInc, 'IDR');
+            document.getElementById('monthly-sum-expense').textContent = formatCurrency(mExp, 'IDR');
+            document.getElementById('monthly-sum-net').textContent = formatCurrency(mInc - mExp, 'IDR');
+        }
+
+        function renderAnalyticsCharts() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1;
+            const currentMonthStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+
+            const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+            const dayLabels = Array.from({length: daysInMonth}, (_, i) => i + 1);
+            const dailyIncomeData = Array(daysInMonth).fill(0);
+            const dailyExpenseData = Array(daysInMonth).fill(0);
+
+            state.transactions.forEach(t => {
+                if(t.date.startsWith(currentMonthStr) && t.type !== 'transfer') {
+                    const day = parseInt(t.date.split('-')[2], 10);
+                    const wallet = state.wallets.find(w => w.id === t.walletId) || { currency: 'IDR' };
+                    const rate = state.exchangeRates[wallet.currency] || 1;
+                    const valIDR = t.amount * rate;
+                    if(t.type === 'income') dailyIncomeData[day - 1] += valIDR;
+                    else dailyExpenseData[day - 1] += valIDR;
+                }
+            });
+
+            if(dailyChartInstance) dailyChartInstance.destroy();
+            const ctxDaily = document.getElementById('dailyChart').getContext('2d');
+            dailyChartInstance = new Chart(ctxDaily, {
+                type: 'bar',
+                data: {
+                    labels: dayLabels,
+                    datasets: [
+                        { label: 'Pemasukan (IDR)', data: dailyIncomeData, backgroundColor: '#10b981', borderRadius: 4 },
+                        { label: 'Pengeluaran (IDR)', data: dailyExpenseData, backgroundColor: '#f43f5e', borderRadius: 4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            const monthlyIncomeData = Array(12).fill(0);
+            const monthlyExpenseData = Array(12).fill(0);
+
+            state.transactions.forEach(t => {
+                if(t.date.startsWith(String(currentYear)) && t.type !== 'transfer') {
+                    const mIndex = parseInt(t.date.split('-')[1], 10) - 1;
+                    const wallet = state.wallets.find(w => w.id === t.walletId) || { currency: 'IDR' };
+                    const rate = state.exchangeRates[wallet.currency] || 1;
+                    const valIDR = t.amount * rate;
+                    if(t.type === 'income') monthlyIncomeData[mIndex] += valIDR;
+                    else monthlyExpenseData[mIndex] += valIDR;
+                }
+            });
+
+            if(monthlyChartInstance) monthlyChartInstance.destroy();
+            const ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
+            monthlyChartInstance = new Chart(ctxMonthly, {
+                type: 'bar',
+                data: {
+                    labels: monthLabels,
+                    datasets: [
+                        { label: 'Pemasukan (IDR)', data: monthlyIncomeData, backgroundColor: '#10b981', borderRadius: 4 },
+                        { label: 'Pengeluaran (IDR)', data: monthlyExpenseData, backgroundColor: '#f43f5e', borderRadius: 4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            const years = [currentYear - 4, currentYear - 3, currentYear - 2, currentYear - 1, currentYear];
+            const yearlyIncomeData = Array(5).fill(0);
+            const yearlyExpenseData = Array(5).fill(0);
+
+            state.transactions.forEach(t => {
+                if(t.type !== 'transfer') {
+                    const yr = parseInt(t.date.split('-')[0], 10);
+                    const yrIndex = years.indexOf(yr);
+                    if(yrIndex !== -1) {
+                        const wallet = state.wallets.find(w => w.id === t.walletId) || { currency: 'IDR' };
+                        const rate = state.exchangeRates[wallet.currency] || 1;
+                        const valIDR = t.amount * rate;
+                        if(t.type === 'income') yearlyIncomeData[yrIndex] += valIDR;
+                        else yearlyExpenseData[yrIndex] += valIDR;
+                    }
+                }
+            });
+
+            if(yearlyChartInstance) yearlyChartInstance.destroy();
+            const ctxYearly = document.getElementById('yearlyChart').getContext('2d');
+            yearlyChartInstance = new Chart(ctxYearly, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [
+                        { label: 'Pemasukan', data: yearlyIncomeData, borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3 },
+                        { label: 'Pengeluaran', data: yearlyExpenseData, borderColor: '#f43f5e', backgroundColor: '#f43f5e', tension: 0.3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        // Render Assets
+        function handleAssetSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('asset-name').value;
+            const type = document.getElementById('asset-type').value;
+            const value = parseFloat(document.getElementById('asset-value').value);
+
+            state.assets.push({ id: 'ast-' + Date.now(), name, type, value });
+            e.target.reset();
+            refreshUI();
+            showNotification('Aset berhasil disimpan!');
+        }
+
+        function deleteAsset(id) {
+            state.assets = state.assets.filter(a => a.id !== id);
+            refreshUI();
+            showNotification('Aset berhasil dihapus!', 'error');
+        }
+
+        function renderAssets() {
+            let positiveAssets = 0;
+            state.wallets.forEach(w => {
+                const rate = state.exchangeRates[w.currency] || 1;
+                positiveAssets += getWalletBalance(w.id) * rate;
+            });
+
+            let totalDebt = 0;
+            const typeLabels = { physical: 'Aset Fisik/Emas', investment: 'Investasi', property: 'Properti', debt: 'Hutang' };
+
+            const tbody = document.getElementById('assets-list');
+            if(state.assets.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400">Belum ada aset tambahan</td></tr>`;
+            } else {
+                tbody.innerHTML = state.assets.map(a => {
+                    if(a.type === 'debt') totalDebt += a.value;
+                    else positiveAssets += a.value;
+
+                    return `
+                        <tr class="hover:bg-slate-50">
+                            <td class="py-3 px-3 font-medium text-slate-700">${a.name}</td>
+                            <td class="py-3 px-3"><span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold">${typeLabels[a.type] || a.type}</span></td>
+                            <td class="py-3 px-3 text-right font-semibold ${a.type === 'debt' ? 'text-rose-600' : 'text-slate-800'}">${formatCurrency(a.value, 'IDR')}</td>
+                            <td class="py-3 px-3 text-center">
+                                <button onclick="deleteAsset('${a.id}')" class="text-slate-400 hover:text-rose-600 transition p-1"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('asset-total-positive').textContent = formatCurrency(positiveAssets, 'IDR');
+            document.getElementById('asset-total-debt').textContent = formatCurrency(totalDebt, 'IDR');
+            document.getElementById('asset-net-worth').textContent = formatCurrency(positiveAssets - totalDebt, 'IDR');
+        }
+
+        // Render Goals
+        function handleGoalSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('goal-name').value;
+            const target = parseFloat(document.getElementById('goal-target').value);
+            const current = parseFloat(document.getElementById('goal-current').value) || 0;
+            const deadline = document.getElementById('goal-deadline').value;
+
+            state.goals.push({ id: 'goal-' + Date.now(), name, target, current, deadline });
+            e.target.reset();
+            refreshUI();
+            showNotification('Target berhasil dibuat!');
+        }
+
+        function deleteGoal(id) {
+            state.goals = state.goals.filter(g => g.id !== id);
+            refreshUI();
+            showNotification('Target berhasil dihapus!', 'error');
+        }
+
+        function openDepositModal(goalId) {
+            document.getElementById('modal-goal-id').value = goalId;
+            document.getElementById('add-saving-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('add-saving-modal').classList.add('hidden');
+        }
+
+        function handleDepositGoal(e) {
+            e.preventDefault();
+            const goalId = document.getElementById('modal-goal-id').value;
+            const amount = parseFloat(document.getElementById('modal-deposit-amount').value);
+
+            const goal = state.goals.find(g => g.id === goalId);
+            if(goal) {
+                goal.current += amount;
+                closeModal();
+                refreshUI();
+                showNotification('Tabungan berhasil ditambahkan!');
+            }
+        }
+
+        function renderGoals() {
+            const grid = document.getElementById('goals-grid');
+            if(state.goals.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 py-6 text-center text-slate-400">Belum ada target</div>`;
+            } else {
+                grid.innerHTML = state.goals.map(g => {
+                    const percentage = Math.min(100, Math.round((g.current / g.target) * 100));
+                    return `
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-slate-800">${g.name}</h4>
+                                    <p class="text-xs text-slate-400">Deadline: ${g.deadline}</p>
+                                </div>
+                                <button onclick="deleteGoal('${g.id}')" class="text-slate-400 hover:text-rose-600 transition"><i class="fa-solid fa-trash text-xs"></i></button>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs font-semibold">
+                                    <span class="text-slate-600">${formatCurrency(g.current, 'IDR')}</span>
+                                    <span class="text-indigo-600">${percentage}% (${formatCurrency(g.target, 'IDR')})</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
+                                </div>
+                            </div>
+                            <button onclick="openDepositModal('${g.id}')" class="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-xl transition">
+                                + Nabung
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Render Categories Manager
+        function handleCategorySubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('cat-name').value;
+            const type = document.getElementById('cat-type').value;
+            const subgroup = type === 'expense' ? document.getElementById('cat-subgroup').value : '';
+
+            if(state.categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+                showNotification('Kategori sudah ada!', 'error');
+                return;
+            }
+
+            state.categories.push({ id: 'cat-' + Date.now(), name, type, subgroup });
+            e.target.reset();
+            toggleCategorySubGroup();
+            refreshUI();
+            showNotification('Kategori berhasil ditambahkan!');
+        }
+
+        function deleteCategory(id) {
+            state.categories = state.categories.filter(c => c.id !== id);
+            refreshUI();
+            showNotification('Kategori berhasil dihapus!', 'error');
+        }
+
+        function renderCategoriesManager() {
+            const expList = document.getElementById('expense-categories-list');
+            const incList = document.getElementById('income-categories-list');
+
+            const expenses = state.categories.filter(c => c.type === 'expense');
+            const incomes = state.categories.filter(c => c.type === 'income');
+
+            expList.innerHTML = expenses.map(c => `
+                <li class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl text-sm border border-slate-100">
+                    <div>
+                        <span class="font-medium text-slate-700">${c.name}</span>
+                        <span class="ml-2 px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-xs uppercase font-semibold">${c.subgroup || 'primer'}</span>
+                    </div>
+                    <button onclick="deleteCategory('${c.id}')" class="text-slate-400 hover:text-rose-600 transition"><i class="fa-solid fa-trash text-xs"></i></button>
+                </li>
+            `).join('');
+
+            incList.innerHTML = incomes.map(c => `
+                <li class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl text-sm border border-slate-100">
+                    <span class="font-medium text-slate-700">${c.name}</span>
+                    <button onclick="deleteCategory('${c.id}')" class="text-slate-400 hover:text-rose-600 transition"><i class="fa-solid fa-trash text-xs"></i></button>
+                </li>
+            `).join('');
+        }
+        function exportDetailedReportToExcel() {
+    let now = new Date();
+    let currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    
+    // Hitung ringkasan analisis untuk laporan
+    let totalIncome = 0, totalExpense = 0;
+    let categoryExpense = {};
+    
+    state.transactions.forEach(t => {
+        let wallet = state.wallets.find(w => w.id === t.walletId) || { currency: 'IDR' };
+        let rate = state.exchangeRates[wallet.currency] || 1;
+        let valIDR = t.amount * rate;
+        
+        if(t.type === 'income') totalIncome += valIDR;
+        if(t.type === 'expense') {
+            totalExpense += valIDR;
+            categoryExpense[t.category] = (categoryExpense[t.category] || 0) + valIDR;
+        }
+    });
+
+    let netCashflow = totalIncome - totalExpense;
+    let savingsRate = totalIncome > 0 ? Math.max(0, Math.round((netCashflow / totalIncome) * 100)) : 0;
+
+    // Susun format CSV / Excel yang rapi menggunakan baris pemisah
+    let content = [];
+    content.push("=== LAPORAN & ANALISIS KEUANGAN DOMPETKU PRO ===");
+    content.push(`Tanggal Export:,${now.toISOString().split('T')[0]}`);
+    content.push("");
+    
+    content.push("--- 1. RINGKASAN ANALISIS KEUANGAN (BULAN INI) ---");
+    content.push(`Total Pemasukan (IDR),${totalIncome}`);
+    content.push(`Total Pengeluaran (IDR),${totalExpense}`);
+    content.push(`Net Cashflow (Selisih),${netCashflow}`);
+    content.push(`Rasio Tabungan (Savings Rate),${savingsRate}%`);
+    content.push("");
+
+    content.push("--- 2. SALDO KEKAYAAN PER AKUN / DOMPET ---");
+    content.push("Nama Dompet,Tipe,Mata Uang,Saldo,Estimasi IDR");
+    state.wallets.forEach(w => {
+        let bal = getWalletBalance(w.id);
+        let rate = state.exchangeRates[w.currency] || 1;
+        content.push(`"${w.name}","${w.group}","${w.currency}",${bal},${bal * rate}`);
+    });
+    content.push("");
+
+    content.push("--- 3. RIWAYAT SELURUH TRANSAKSI ---");
+    content.push("Tanggal,Dompet,Tipe,Kategori,Catatan,Jumlah,Mata Uang");
+    state.transactions.forEach(t => {
+        let wallet = state.wallets.find(w => w.id === t.walletId) || { name: 'Transfer', currency: 'IDR' };
+        let toWallet = state.wallets.find(w => w.id === t.toWalletId);
+        let walletName = toWallet ? `${wallet.name} -> ${toWallet.name}` : wallet.name;
+        content.push(`"${t.date}","${walletName}","${t.type}","${t.category}","${t.note || ''}",${t.amount},"${wallet.currency}"`);
+    });
+
+    // Proses download file
+    let csvFile = new Blob([content.join("\n")], { type: "text/csv;charset=utf-8;" });
+    let downloadLink = document.createElement("a");
+    downloadLink.download = `Laporan_Analisis_Keuangan_${now.toISOString().split('T')[0]}.csv`;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    showNotification('Laporan analitik berhasil diunduh!');
+}
+function resetAppData() {
+    if (confirm("Apakah Anda yakin ingin mereset seluruh data? Semua transaksi, dompet, dan aset yang telah dimasukkan akan terhapus dan kembali ke data awal.")) {
+        localStorage.clear();
+        location.reload();
+    }
+}
+    </script>
+</body>
+</html>
